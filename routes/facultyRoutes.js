@@ -5,15 +5,11 @@ const user = require('../models/user');
 const notification = require('../models/notificaton');
 const path = require('path');
 const assingnment = require('../models/assignments');
+const Quiz = require('../models/quiz');
+const scores = require('../models/scores');
+const multer = require('multer');
 
 const router = express.Router();
-
-const requireLogin = (req, res, next) => {
-    if (!req.session.userId) {
-        return res.redirect('/');
-    }
-    next();
-};
 
 const storageLecture = multer.diskStorage({
     destination: "./uploaded/LecturePDF/",
@@ -31,7 +27,7 @@ const requireFaculty = (req, res, next) => {
 };
 
 
-router.get('/admin', requireLogin, async (req, res) => {
+router.get('/admin', requireFaculty, async (req, res) => {
     const course = await courses.find();
     res.json({
         success: true,
@@ -40,14 +36,14 @@ router.get('/admin', requireLogin, async (req, res) => {
     })
 });
 
-router.get('/createCourse', requireLogin, async (req, res) => {
+router.get('/createCourse', requireFaculty, async (req, res) => {
     res.json({
         success: true,
         message: 'create course here'
     })
 });
 
-router.post('/createCourse', requireLogin, async (req, res) => {
+router.post('/createCourse', requireFaculty, async (req, res) => {
     try {
         console.log('Inside signup route');
 
@@ -88,9 +84,6 @@ router.put('/update/:courseName', requireFaculty, uploadLecture.single("file"), 
             return res.status(404).json({ success: false, message: "Course not found" });
         }
 
-
-
-        // ✅ Update course details
         course.title = title || course.title;
         course.description = description || course.description;
         if (content) {
@@ -172,7 +165,7 @@ router.post('/uploadAssingment', requireFaculty, uploadLecture.single("file"), a
 
 });
 
-router.post('/notification', async (req, res) => {
+router.post('/notification', requireFaculty, async (req, res) => {
     const { Uploadednotification } = req.body;
     const id = req.session.userId;
     const user = await user.findById(id);
@@ -181,6 +174,77 @@ router.post('/notification', async (req, res) => {
         role: user.role,
         name: user.userName,
     });
+});
+
+
+
+router.post('/create', requireFaculty, async (req, res) => {
+    try {
+        const { courseId, questions } = req.body;
+
+        const courseExists = await courses.findById(courseId);
+        if (!courseExists) {
+            return res.status(404).json({ success: false, message: 'Course not found' });
+        }
+
+        if (!Array.isArray(questions) || questions.length === 0) {
+            return res.status(400).json({ success: false, message: 'Questions must be an array and cannot be empty' });
+        }
+
+        for (let q of questions) {
+            if (!q.question || !Array.isArray(q.options) || q.options.length < 4 || q.correctIndex === undefined) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Each question must have a question text, at least four options, and a correctIndex',
+                });
+            }
+        }
+
+        const id = req.session.userId;
+
+
+        const newQuiz = new Quiz({
+            courseId,
+            questions,
+            createdBy: id
+        });
+
+        await newQuiz.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Quiz created successfully',
+            quiz: newQuiz,
+        });
+    } catch (error) {
+        console.error('Error creating quiz:', error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+});
+
+router.get('/CheckAssignment', requireFaculty, async (req, res) => {
+    const { studentId, AssignmentTitle } = req.body;
+    const exist = await assingnment.find({ AssignmentTitle: AssignmentTitle, studentId: studentId });
+
+    res.json({
+        success: true,
+        exist,
+    })
+
+});
+
+router.post('/checkAssignment', requireFaculty, async (req, res) => {
+    const { AssignmentTitle, score, studentId } = req.body;
+
+    const exist = await scores.findOne({ AssignmentTitle: AssignmentTitle, studentId: studentId });
+    const updateScore = await scores.findByIdAndUpdate(exist._id, { score: score });
+
+    res.json({
+        sucess: true,
+        message: 'Scores updated',
+    })
+
 })
+
 
 module.exports = router;
