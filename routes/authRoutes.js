@@ -1,7 +1,11 @@
 const express = require('express');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
-// require('dotenv').config();
+const courses = require('../models/courses');
+const passport = require('passport');
+const validator = require('validator');
+// require('../passport');
+require('dotenv').config();
 
 const router = express.Router();
 
@@ -17,6 +21,27 @@ router.post('/signup', async (req, res) => {
                 success: false,
                 message: "Please enter all the credentials"
             });
+        }
+
+        if (!validator.isEmail(email)) {
+            return res.status(500).json({
+                sucess: false,
+                message: 'email is not valid please provide valid email'
+            })
+        }
+
+        if (password === confirmPassword) {
+            return res.status(500).json({
+                sucess: false,
+                message: 'password and confirm password are not same ',
+            })
+        }
+
+        if (password.length < 6) {
+            return res.status(500).json({
+                sucess: false,
+                message: 'password is too short'
+            })
         }
 
         console.log('Checking if user exists...');
@@ -41,10 +66,40 @@ router.post('/signup', async (req, res) => {
 
         req.session.userId = newUser._id;
 
-        return res.status(201).json({
-            success: true,
-            message: `${role} has signed up successfully`
-        });
+        if (newUser.role.toLowerCase() == 'student') {
+            const allCourse = await courses.find();
+            const enrolledCourses = await courses.find({ enrolledStudents: { $in: [newUser._id] } });
+
+            return res.json({
+                sucess: true,
+                message: 'student loged in',
+                allCourse,
+                enrolledCourses
+            })
+        }
+
+        if (newUser.role.toLowerCase() == 'faculty') {
+            const allCourse = await courses.find();
+            // const enrolledCourses = await courses.find({ enrolledStudents: { $in: [newUser._id] } });
+
+            return res.json({
+                sucess: true,
+                message: 'faculty loged in',
+                allCourse,
+            })
+        }
+
+        if (newUser.role.toLowerCase() == 'admin') {
+            const allCourse = await courses.find();
+            // const enrolledCourses = await courses.find({ enrolledStudents: { $in: [newUser._id] } });
+
+            return res.json({
+                sucess: true,
+                message: 'admin loged in',
+                allCourse,
+                // enrolledCourses
+            })
+        }
 
     } catch (error) {
         console.error('Signup Error:', error);
@@ -90,9 +145,14 @@ router.post('/login', async (req, res) => {
 
 
         if (exist.role.toLowerCase() == 'student') {
+            const allCourse = await courses.find();
+            const enrolledCourses = await courses.find({ enrolledStudents: { $in: [exist._id] } });
+
             return res.json({
                 sucess: true,
-                message: 'student loged in'
+                message: 'student loged in',
+                allCourse,
+                enrolledCourses
             })
         }
 
@@ -101,5 +161,41 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 });
+
+router.get('/auth/google', passport.authenticate('google', {
+    scope:
+        ['email', 'profile']
+}));
+
+router.get('/auth/google/callback', passport.authenticate('google', {
+    successRedirect: '/success',
+    failureRedirect: '/faliure'
+}));
+
+router.get('/success', (req, res) => {
+    console.log(req.user);
+    res.json({
+        sucess: true,
+        message: 'successfull authentication',
+    })
+})
+
+router.get('/faliure', (req, res) => {
+    res.json({
+        sucess: false,
+        message: 'failed to authenticate'
+    })
+});
+
+router.get('/auth/github',
+    passport.authenticate('github', { scope: ['user:email'] }));
+
+router.get('/auth/github/callback',
+    passport.authenticate('github', { failureRedirect: '/login' }),
+    function (req, res) {
+
+        res.json('/');
+    });
+
 
 module.exports = router;

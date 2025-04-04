@@ -135,8 +135,12 @@ router.post('/editBatch', async (req, res) => {
 
 router.post('/notification', async (req, res) => {
     const { Uploadednotification } = req.body;
+    const id = req.session.userId;
+    const user = await user.findById(id);
     const newNotification = await notification.create({
         Uploadednotification,
+        role: user.role,
+        name: user.userName,
     });
 })
 
