@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
-// require('dotenv').config();
+const cors = require('cors')
+require('dotenv').config();
 require('./databases/conn');
 
 const app = express();
@@ -10,14 +11,15 @@ app.use(session({
     saveUninitialized: false
 }));
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use("/user", require('./routes/authRoutes'));
 app.use("", require('./routes/adminRoutes'));
-app.use("", require('./routes/authRoutes'));
 
-// app.get('/', (req, res) => {
-//     res.send('Hello World');
-// });
+app.get('/', (req, res) => {
+    res.send('Hello World');
+});
 
 
 

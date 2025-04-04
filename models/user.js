@@ -1,29 +1,22 @@
 const mongoose = require('mongoose');
 
-const UserSchema = new mongoose.Schema({
+const schema = new mongoose.Schema({
     userName: {
         type: String,
-        required: true,
-        trim: true
+        required: true
     },
     email: {
         type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true,
-        match: [/^\S+@\S+\.\S+$/, 'Invalid email format']
+        required: true
     },
     password: {
         type: String,
-        required: true,
-        minlength: 6
+        required: true
     },
     role: {
         type: String,
         required: true,
-        enum: ['admin', 'faculty', 'student']
     }
 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('Glitch', schema);
