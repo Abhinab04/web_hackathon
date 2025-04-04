@@ -61,7 +61,7 @@ router.post('/signup', async (req, res) => {
             password: newPassword,
             role: role
         })
-        req.session.userId = newuser._id;
+
         if (newuser.role.toLowerCase() == 'admin') {
             const today = moment().toDate();
 
@@ -71,7 +71,7 @@ router.post('/signup', async (req, res) => {
                 const ongoingCourses = await hackathon.find({
                     StartDate: { $lte: today },
                 });
-                req.session.userId = exist._id;
+                req.session.userId = newuser._id;
                 return res.json({
                     sucess: true,
                     message: 'new Admin Created',
@@ -131,11 +131,34 @@ router.post('/login', async (req, res) => {
         console.log('User ID stored in session:', req.session.userId);
 
         // Respond based on role
-        return res.json({
-            success: true,
-            msg: `${exist.role} logged in`,
-            role: exist.role.toLowerCase()
-        });
+        // return res.json({
+        //     success: true,
+        //     msg: `${exist.role} logged in`,
+        //     role: exist.role.toLowerCase()
+        // });
+
+        if (newuser.role.toLowerCase() == 'admin') {
+            const today = moment().toDate();
+
+            try {
+                const upcomingCourses = await courses.find({ StartDate: { $gt: today } });
+
+                const ongoingCourses = await hackathon.find({
+                    StartDate: { $lte: today },
+                });
+                req.session.userId = exist._id;
+                return res.json({
+                    sucess: true,
+                    message: 'new Admin Created',
+                    upcomingCourses,
+                    ongoingCourses
+                })
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
 
     } catch (error) {
         console.error('Login Error:', error);
