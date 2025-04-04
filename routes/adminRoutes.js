@@ -6,14 +6,14 @@ const notification = require('../models/notificaton');
 
 const router = express.Router();
 
-const requireLogin = (req, res, next) => {
-    if (!req.session.userId) {
-        return res.redirect('/');
+const requireAdmin = (req, res, next) => {
+    if (!req.session.userId || req.session.userId !== 'admin') {
+        return res.status(403).json({ success: false, message: "Access denied. Only faculty can manage courses." });
     }
     next();
 };
 
-router.get('/admin', requireLogin, async (req, res) => {
+router.get('/admin', requireAdmin, async (req, res) => {
     const course = await courses.find();
     res.json({
         success: true,
@@ -22,14 +22,14 @@ router.get('/admin', requireLogin, async (req, res) => {
     })
 });
 
-router.get('/createCourse', requireLogin, async (req, res) => {
+router.get('/createCourse', requireAdmin, async (req, res) => {
     res.json({
         success: true,
         message: 'create course here'
     })
 });
 
-router.post('/createCourse', requireLogin, async (req, res) => {
+router.post('/createCourse', requireAdmin, async (req, res) => {
     try {
         console.log('Inside signup route');
 
@@ -60,7 +60,7 @@ router.post('/createCourse', requireLogin, async (req, res) => {
     }
 });
 
-router.get('/allStudent', async (req, res) => {
+router.get('/allStudent', requireAdmin, async (req, res) => {
     try {
         page = parseInt(page) || 1;
         limit = 10;
@@ -90,7 +90,7 @@ router.get('/allStudent', async (req, res) => {
     }
 });
 
-router.get('/allFaculty', async (req, res) => {
+router.get('/allFaculty', requireAdmin, async (req, res) => {
     try {
         page = parseInt(page) || 1;
         limit = 10;
@@ -120,7 +120,7 @@ router.get('/allFaculty', async (req, res) => {
     }
 });
 
-router.post('/editBatch', async (req, res) => {
+router.post('/editBatch', requireAdmin, async (req, res) => {
     const { oldcourseName, newcourseName, description, price } = req.body;
     const exist = await courses.findOne({ courseName: oldcourseName });
     const updatedCourse = await user.findByIdAndUpdate(exist._id, {
@@ -133,7 +133,7 @@ router.post('/editBatch', async (req, res) => {
 
 });
 
-router.post('/notification', async (req, res) => {
+router.post('/notification', requireAdmin, async (req, res) => {
     const { Uploadednotification } = req.body;
     const id = req.session.userId;
     const user = await user.findById(id);
