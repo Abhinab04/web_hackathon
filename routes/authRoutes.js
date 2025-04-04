@@ -1,160 +1,121 @@
 const express = require('express');
-const User = require('../models/user');
+const schema = require('../models/user');
 const bcrypt = require('bcryptjs');
-const courses = require('../models/courses');
-const passport = require('passport');
 const validator = require('validator');
-// require('../passport');
-require('dotenv').config();
+// require('dotenv').config();
 
 const router = express.Router();
 
+router.get("/hello", (req, res) => {
+    res.send("hellow")
+})
 
 router.post('/signup', async (req, res) => {
+    console.log('signup k andar');
     try {
-        console.log('Inside signup route');
+        const { name, email, password, confirm, role } = req.body;
+        let error = [];
+        console.log(name, email, password, confirm, role)
+        console.log('try k andar');
 
-        const { userName, email, password, role } = req.body;
-
-        if (!userName || !email || !password || !role) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter all the credentials"
-            });
+        if (name === '' || email === '' || !password === '' || !confirm === '' || !role === '') {
+            error.push({ msg: "Please fill all the blanks" })
         }
 
         if (!validator.isEmail(email)) {
-            return res.status(500).json({
-                sucess: false,
-                message: 'email is not valid please provide valid email'
-            })
+            error.push({ msg: "Email is not valid" });
         }
 
-        if (password === confirmPassword) {
-            return res.status(500).json({
-                sucess: false,
-                message: 'password and confirm password are not same ',
-            })
+        if (password !== confirm) {
+            error.push({ msg: "Password mismatch" })
         }
 
         if (password.length < 6) {
-            return res.status(500).json({
+            error.push({ msg: "password is too short" })
+        }
+        if (!role === 'student' || !role === 'faculty' || !role === 'admin') {
+            error.push({ msg: "Invalid input for role" })
+        }
+        if (error.length > 0) {
+            return res.json({ sucess: false, msg: "re render the register", error })
+        }
+
+        const exist = await schema.findOne({ email: email })
+        if (exist) {
+            error.push({ msg: 'username already exist' })
+            return res.json({
                 sucess: false,
-                message: 'password is too short'
+                message: 'user already exits try to sinup',
+                error
             })
         }
-
-        console.log('Checking if user exists...');
-        const exist = await User.findOne({ email: email });
-
-        if (exist) {
-            return res.status(409).json({
-                success: false,
-                message: 'Email already exists. Please log in.'
-            });
-        }
-
-        const salt = bcrypt.genSaltSync(10);
+        var salt = bcrypt.genSaltSync(15);
         const newPassword = await bcrypt.hash(password, salt);
 
-        const newUser = await User.create({
-            userName,
-            email,
+
+        const newuser = await schema.create({
+            userName: name,
+            email: email,
             password: newPassword,
-            role
-        });
-
-        req.session.userId = newUser._id;
-
-        if (newUser.role.toLowerCase() == 'student') {
-            const allCourse = await courses.find();
-            const enrolledCourses = await courses.find({ enrolledStudents: { $in: [newUser._id] } });
-
-            return res.json({
-                sucess: true,
-                message: 'student loged in',
-                allCourse,
-                enrolledCourses
-            })
-        }
-
-        if (newUser.role.toLowerCase() == 'faculty') {
-            const allCourse = await courses.find();
-            // const enrolledCourses = await courses.find({ enrolledStudents: { $in: [newUser._id] } });
-
-            return res.json({
-                sucess: true,
-                message: 'faculty loged in',
-                allCourse,
-            })
-        }
-
-        if (newUser.role.toLowerCase() == 'admin') {
-            const allCourse = await courses.find();
-            // const enrolledCourses = await courses.find({ enrolledStudents: { $in: [newUser._id] } });
-
-            return res.json({
-                sucess: true,
-                message: 'admin loged in',
-                allCourse,
-                // enrolledCourses
-            })
-        }
-
+            role: role
+        })
+        req.session.userId = newuser._id;
+        return res.json({
+            sucess: true,
+            message: 'new User Created'
+        })
     } catch (error) {
-        console.error('Signup Error:', error);
-        res.status(500).json({ success: false, message: 'Internal Server Error' });
+        console.log(error);
+        return res.status(500).json('Internal Server Error');
     }
-});
+})
 
 // Login Route
+// router.get('/login',(req,res)=>{
+//     res.send("hello world")
+// })
 router.post('/login', async (req, res) => {
+    let error = []; // Store errors here
+
     try {
         console.log('Inside login route');
 
-        const { userName, email, password } = req.body;
+        const { email, password } = req.body;
+        console.log('Received credentials:', email, password);
 
-        if (!userName || !email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please fill all the credentials'
-            });
+        // Validate input fields
+        if (!email || !password) {
+            error.push({ msg: "Please fill all the blanks" });
         }
 
         console.log('Checking if user exists...');
-        const exist = await User.findOne({ email: email });
+        const exist = await schema.findOne({ email: email });
 
         if (!exist) {
-            return res.status(401).json({
-                success: false,
-                message: 'Email is not registered. Please double-check it.'
-            });
+            error.push({ msg: "User is not registered" });
+        } else {
+            // Check password only if user exists
+            const isPasswordMatch = await bcrypt.compare(password, exist.password);
+            if (!isPasswordMatch) {
+                error.push({ msg: "Password doesn't match" });
+            }
         }
 
-        const isPasswordMatch = await bcrypt.compare(password, exist.password);
-
-        if (!isPasswordMatch) {
-            return res.status(401).json({
-                success: false,
-                message: 'Incorrect password. Please try again.'
-            });
+        // If there are any errors, return response with errors
+        if (error.length > 0) {
+            return res.json({ success: false, msg: "Re-render the login", error });
         }
-        console.log(exist._id)
-        req.session.UserId = exist._id;
-        console.log(exist._id)
 
+        // Store session data
+        req.session.userId = exist._id;
+        console.log('User ID stored in session:', req.session.userId);
 
-        if (exist.role.toLowerCase() == 'student') {
-            const allCourse = await courses.find();
-            const enrolledCourses = await courses.find({ enrolledStudents: { $in: [exist._id] } });
-
-            return res.json({
-                sucess: true,
-                message: 'student loged in',
-                allCourse,
-                enrolledCourses
-            })
-        }
+        // Respond based on role
+        return res.json({
+            success: true,
+            msg: `${exist.role} logged in`,
+            role: exist.role.toLowerCase()
+        });
 
     } catch (error) {
         console.error('Login Error:', error);
@@ -162,40 +123,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/auth/google', passport.authenticate('google', {
-    scope:
-        ['email', 'profile']
-}));
-
-router.get('/auth/google/callback', passport.authenticate('google', {
-    successRedirect: '/success',
-    failureRedirect: '/faliure'
-}));
-
-router.get('/success', (req, res) => {
-    console.log(req.user);
-    res.json({
-        sucess: true,
-        message: 'successfull authentication',
-    })
-})
-
-router.get('/faliure', (req, res) => {
-    res.json({
-        sucess: false,
-        message: 'failed to authenticate'
-    })
-});
-
-router.get('/auth/github',
-    passport.authenticate('github', { scope: ['user:email'] }));
-
-router.get('/auth/github/callback',
-    passport.authenticate('github', { failureRedirect: '/login' }),
-    function (req, res) {
-
-        res.json('/');
-    });
 
 
 module.exports = router;
