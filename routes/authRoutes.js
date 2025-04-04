@@ -2,6 +2,8 @@ const express = require('express');
 const schema = require('../models/user');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
+const moment = require('moment');
+const courses = require('../models/courses');
 // require('dotenv').config();
 
 const router = express.Router();
@@ -60,10 +62,28 @@ router.post('/signup', async (req, res) => {
             role: role
         })
         req.session.userId = newuser._id;
-        return res.json({
-            sucess: true,
-            message: 'new User Created'
-        })
+        if (newuser.role.toLowerCase() == 'admin') {
+            const today = moment().toDate();
+
+            try {
+                const upcomingCourses = await courses.find({ StartDate: { $gt: today } });
+
+                const ongoingCourses = await hackathon.find({
+                    StartDate: { $lte: today },
+                });
+                req.session.userId = exist._id;
+                return res.json({
+                    sucess: true,
+                    message: 'new Admin Created',
+                    upcomingCourses,
+                    ongoingCourses
+                })
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json('Internal Server Error');
