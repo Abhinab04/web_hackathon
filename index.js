@@ -11,7 +11,10 @@ app.use(session({
     saveUninitialized: false
 }));
 
-app.use(cors());
+app.use(cors({
+    origin:"https://roaring-scone-01e7f7.netlify.app/",
+    credentials:true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/user", require('./routes/authRoutes'));
