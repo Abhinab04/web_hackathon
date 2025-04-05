@@ -153,6 +153,13 @@ router.post('/notification', requireAdmin, async (req, res) => {
     });
 })
 
+router.get('/allNotification', async (req, res) => {
+    const notifications = await notificaton.find();
+    res.json({
+        notifications,
+    })
+});
+
 router.put('/update/:courseName', requireAdmin, uploadLecture.single("file"), async (req, res) => {
     try {
         const { courseId } = req.params;
