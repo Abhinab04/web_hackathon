@@ -3,16 +3,17 @@ const session = require('express-session');
 const courses = require('../models/courses');
 const user = require('../models/user');
 const notification = require('../models/notificaton');
+const multer = require('multer')
 
 const router = express.Router();
 
-const storageLecture = multer.diskStorage({
-    destination: "./uploaded/LecturePDF/",
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
-});
-const uploadLecture = multer({ storageLecture });
+// const storageLecture = multer.diskStorage({
+//     destination: "./uploaded/LecturePDF/",
+//     filename: (req, file, cb) => {
+//         cb(null, Date.now() + path.extname(file.originalname));
+//     },
+// });
+// const uploadLecture = multer({ storageLecture });
 
 const requireAdmin = (req, res, next) => {
     if (!req.session.userId || req.session.userId !== 'admin') {
@@ -69,11 +70,11 @@ router.post('/createCourse', requireAdmin, async (req, res) => {
     }
 });
 
-router.get('/allStudentss/:page', requireAdmin, async (req, res) => {
-    try {
-        page = parseInt(req.params.page) || 1;
-        limit = 10;
+router.get('/allStudentss/:page', async (req, res) => {
 
+    try {
+        const page = parseInt(req.params.page) || 1;
+        const limit = 10;
         const skip = (page - 1) * limit;
 
         const students = await user.find({ role: 'student' })
@@ -99,11 +100,10 @@ router.get('/allStudentss/:page', requireAdmin, async (req, res) => {
     }
 });
 
-router.get('/allFaculty/:page', requireAdmin, async (req, res) => {
+router.get('/allFacultyss/:page', requireAdmin, async (req, res) => {
     try {
-        page = parseInt(req.params.page) || 1;
-        limit = 10;
-
+        const page = parseInt(req.params.page) || 1;
+        const limit = 10;
         const skip = (page - 1) * limit;
 
         const students = await user.find({ role: 'faculty' })
@@ -129,16 +129,15 @@ router.get('/allFaculty/:page', requireAdmin, async (req, res) => {
     }
 });
 
-router.post('/editBatch', requireAdmin, async (req, res) => {
+router.post('/editBatch', async (req, res) => {
     const { oldcourseName, newcourseName, description, price } = req.body;
+    console.log(oldcourseName,newcourseName,description,price)
     const exist = await courses.findOne({ courseName: oldcourseName });
-    const updatedCourse = await user.findByIdAndUpdate(exist._id, {
+    const updatedCourse = await courses.findByIdAndUpdate(exist._id, {
         courseName: newcourseName,
-        description: description,
-        price: price,
-    },
-        { new: true }
-    );
+        description,
+        price,
+    }, { new: true });    
 
 });
 
@@ -153,56 +152,49 @@ router.post('/notification', requireAdmin, async (req, res) => {
     });
 })
 
-router.get('/allNotification', async (req, res) => {
-    const notifications = await notificaton.find();
-    res.json({
-        notifications,
-    })
-});
+// router.put('/update/:courseName', requireAdmin, uploadLecture.single("file"), async (req, res) => {
+//     try {
+//         const { courseId } = req.params;
+//         const { courseName, description, content, price } = req.body;
 
-router.put('/update/:courseName', requireAdmin, uploadLecture.single("file"), async (req, res) => {
-    try {
-        const { courseId } = req.params;
-        const { courseName, description, content, price } = req.body;
+//         const course = await courses.findById(courseId);
+//         if (!course) {
+//             return res.status(404).json({ success: false, message: "Course not found" });
+//         }
 
-        const course = await courses.findById(courseId);
-        if (!course) {
-            return res.status(404).json({ success: false, message: "Course not found" });
-        }
+//         course.title = title || course.title;
+//         course.description = description || course.description;
+//         if (content) {
+//             try {
+//                 const filePath = req.file.path;
+//                 const savePath = path.join(__dirname, `../parsed_texts/${req.file.originalname}.pdf`);
 
-        course.title = title || course.title;
-        course.description = description || course.description;
-        if (content) {
-            try {
-                const filePath = req.file.path;
-                const savePath = path.join(__dirname, `../parsed_texts/${req.file.originalname}.pdf`);
+//                 let dataBuffer = fs.readFileSync(filePath);
 
-                let dataBuffer = fs.readFileSync(filePath);
+//                 pdf(dataBuffer).then((data) => {
+//                     try {
+//                         fs.writeFileSync(savePath, data.text);
+//                         console.log('PDF text extracted and saved successfully.');
 
-                pdf(dataBuffer).then((data) => {
-                    try {
-                        fs.writeFileSync(savePath, data.text);
-                        console.log('PDF text extracted and saved successfully.');
+//                         course.content = [{ type: 'pdf', title: req.file.originalname, path: savePath }];
+//                     } catch (error) {
+//                         console.error('Error writing extracted text:', error);
+//                     }
+//                 }).catch((err) => {
+//                     console.error('Error parsing PDF:', err);
+//                 });
 
-                        course.content = [{ type: 'pdf', title: req.file.originalname, path: savePath }];
-                    } catch (error) {
-                        console.error('Error writing extracted text:', error);
-                    }
-                }).catch((err) => {
-                    console.error('Error parsing PDF:', err);
-                });
+//             } catch (error) {
+//                 console.error('Error processing file:', error);
+//             }
+//         }
 
-            } catch (error) {
-                console.error('Error processing file:', error);
-            }
-        }
-
-        await course.save();
-        res.json({ success: true, message: "Course updated successfully", course });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
-    }
-});
+//         await course.save();
+//         res.json({ success: true, message: "Course updated successfully", course });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ success: false, message: "Internal Server Error" });
+//     }
+// });
 
 module.exports = router;

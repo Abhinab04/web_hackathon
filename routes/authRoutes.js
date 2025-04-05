@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const moment = require('moment');
 const courses = require('../models/courses');
-const notification = require('../models/notificaton');
 const notificaton = require('../models/notificaton');
 const assignment = require('../models/assignments');
 // require('dotenv').config();
@@ -204,29 +203,6 @@ router.post('/login', async (req, res) => {
                     enrolledCourses,
                     notifications,
                     assignments
-                })
-
-            } catch (error) {
-                console.log(error);
-            }
-
-        }
-        if (exist.role.toLowerCase() == 'faculty') {
-            const today = moment().toDate();
-
-            try {
-                const allCourses = await courses.find();
-
-                const enrolledCourses = await courses.find({ enrolledStudents: req.session.userId });
-                const notifications = await notificaton.find();
-                // const assignments = await assignment.find();
-                req.session.userId = exist._id;
-                return res.json({
-                    success: true,
-                    message: 'new student Created',
-                    allCourses,
-                    // enrolledCourses,
-                    notifications,
                 })
 
             } catch (error) {

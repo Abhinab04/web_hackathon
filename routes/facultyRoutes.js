@@ -7,19 +7,17 @@ const path = require('path');
 const assingnment = require('../models/assignments');
 const Quiz = require('../models/quiz');
 const scores = require('../models/scores');
-const multer = require('multer');
-const pdf = require('pdf-parse');
-const fs = require('fs');
+// const multer = require('multer');
 
 const router = express.Router();
 
-const storageLecture = multer.diskStorage({
-    destination: "./uploaded/LecturePDF/",
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
-});
-const uploadLecture = multer({ storageLecture });
+// const storageLecture = multer.diskStorage({
+//     destination: "./uploaded/LecturePDF/",
+//     filename: (req, file, cb) => {
+//         cb(null, Date.now() + path.extname(file.originalname));
+//     },
+// });
+// const uploadLecture = multer({ storageLecture });
 
 const requireFaculty = (req, res, next) => {
     if (!req.session.userId || req.session.userId !== 'faculty') {
@@ -45,9 +43,9 @@ router.get('/createCourse', requireFaculty, async (req, res) => {
     })
 });
 
-router.post('/createCourses', async (req, res) => {
+router.post('/createCourse', requireFaculty, async (req, res) => {
     try {
-        console.log('Inside create course route');
+        console.log('Inside signup route');
 
         const { courseName, description, price } = req.body;
 
@@ -65,117 +63,107 @@ router.post('/createCourses', async (req, res) => {
                 message: 'This course is already present.'
             });
         }
-        const newCourse = await courses.create({
+        const newCourse = await user.create({
             courseName,
             description,
             price,
         });
-        res.json({
-            message: 'course created',
-            sucess: true,
-        })
 
     } catch (error) {
         console.log(error);
     }
 });
 
-router.put('/update/:courseName', requireFaculty, uploadLecture.single("file"), async (req, res) => {
-    try {
-        const { courseName } = req.params;
-        const { description, content, price } = req.body;
+// router.put('/update/:courseName', requireFaculty, uploadLecture.single("file"), async (req, res) => {
+//     try {
+//         const { courseId } = req.params;
+//         const { courseName, description, content, price } = req.body;
 
-        const course = await courses.findOne({ courseName });
-        if (!course) {
-            return res.status(404).json({ success: false, message: "Course not found" });
-        }
+//         const course = await courses.findById(courseId);
+//         if (!course) {
+//             return res.status(404).json({ success: false, message: "Course not found" });
+//         }
 
-        course.courseName = courseName || course.courseName;
-        course.description = description || course.description;
-        course.price = price || course.price;
+//         course.title = title || course.title;
+//         course.description = description || course.description;
+//         if (content) {
+//             try {
+//                 const filePath = req.file.path;
+//                 const savePath = path.join(__dirname, `../parsed_texts/${req.file.originalname}.pdf`);
 
-        if (req.file) {
-            try {
-                const filePath = req.file.path;
-                const savePath = path.join(__dirname, `../parsed_texts/${req.file.originalname}.txt`);
+//                 let dataBuffer = fs.readFileSync(filePath);
 
-                const dataBuffer = fs.readFileSync(filePath);
-                const parsedData = await pdf(dataBuffer);
+//                 pdf(dataBuffer).then((data) => {
+//                     try {
+//                         fs.writeFileSync(savePath, data.text);
+//                         console.log('PDF text extracted and saved successfully.');
 
-                fs.writeFileSync(savePath, parsedData.text);
-                console.log('PDF text extracted and saved successfully.');
+//                         course.content = [{ type: 'pdf', title: req.file.originalname, path: savePath }];
+//                     } catch (error) {
+//                         console.error('Error writing extracted text:', error);
+//                     }
+//                 }).catch((err) => {
+//                     console.error('Error parsing PDF:', err);
+//                 });
 
-                course.content = [{
-                    type: 'pdf',
-                    title: req.file.originalname,
-                    path: savePath
-                }];
+//             } catch (error) {
+//                 console.error('Error processing file:', error);
+//             }
+//         }
 
-            } catch (fileError) {
-                console.error('Error processing file:', fileError);
-                return res.status(500).json({ success: false, message: "Error processing PDF file" });
-            }
-        }
+//         await course.save();
+//         res.json({ success: true, message: "Course updated successfully", course });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ success: false, message: "Internal Server Error" });
+//     }
+// });
 
-        await course.save();
-        res.json({ success: true, message: "Course updated successfully", course });
+// const storageAssingnment = multer.diskStorage({
+//     destination: "./uploaded/Assingnments/",
+//     filename: (req, file, cb) => {
+//         cb(null, Date.now() + path.extname(file.originalname));
+//     },
+// });
+// const uploadAssignment = multer({ storageAssingnment });
 
-    } catch (error) {
-        console.error('Update Error:', error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
-    }
-});
+// router.post('/uploadAssingment', requireFaculty, uploadLecture.single("file"), async (req, res) => {
+//     const { deadline } = req.body;
+//     if (!req.file) {
+//         return res.status(400).json({
+//             success: false,
+//             message: "Nothing is uploaded buddy"
+//         });
+//     }
+//     try {
+//         const filePath = req.file.path;
+//         const savePath = path.join(__dirname, `../Assignment_texts/${req.file.originalname}.pdf`);
 
-const storageAssignment = multer.diskStorage({
-    destination: "./uploaded/Assignments/",
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
-});
-const uploadAssignment = multer({ storage: storageAssignment });
+//         let dataBuffer = fs.readFileSync(filePath);
 
-router.post('/uploadAssignment', uploadAssignment.single("file"), async (req, res) => {
-    const { deadline } = req.body;
+//         pdf(dataBuffer).then((data) => {
+//             try {
+//                 fs.writeFileSync(savePath, data.text);
+//                 console.log('PDF text extracted and saved successfully.');
 
-    if (!req.file) {
-        return res.status(400).json({
-            success: false,
-            message: "Nothing is uploaded buddy"
-        });
-    }
+//                 const newAssingnment = assingnment.create({
+//                     AssignmentTitle: req.file.originalname,
+//                     DeadLine: deadline
+//                 });
 
-    try {
-        const filePath = req.file.path;
-        const savePath = path.join(__dirname, `../Assignment_texts/${req.file.originalname}.txt`); // use `.txt` instead of `.pdf` here
+//             } catch (error) {
+//                 console.error('Error writing extracted text:', error);
+//             }
+//         }).catch((err) => {
+//             console.error('Error parsing PDF:', err);
+//         });
 
-        const dataBuffer = fs.readFileSync(filePath);
+//     }
+//     catch (error) {
+//         console.error('Error processing file:', error);
+//     }
 
-        const data = await pdf(dataBuffer);
-
-        fs.writeFileSync(savePath, data.text);
-        console.log('PDF text extracted and saved successfully.');
-
-        const newAssignment = await assignment.create({
-            AssignmentTitle: req.file.originalname,
-            DeadLine: deadline,
-            filePath: filePath,
-            extractedTextPath: savePath
-        });
-
-        return res.status(201).json({
-            success: true,
-            message: "Assignment uploaded successfully",
-            assignment: newAssignment
-        });
-
-    } catch (error) {
-        console.error('Error processing file:', error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-    }
-});
+// });
 
 router.post('/notification', requireFaculty, async (req, res) => {
     const { Uploadednotification } = req.body;
@@ -190,7 +178,7 @@ router.post('/notification', requireFaculty, async (req, res) => {
 
 
 
-router.post('/createQuiz', requireFaculty, async (req, res) => {
+router.post('/create', requireFaculty, async (req, res) => {
     try {
         const { courseId, questions } = req.body;
 
@@ -257,13 +245,6 @@ router.post('/checkAssignment', requireFaculty, async (req, res) => {
     })
 
 })
-
-router.get('/allNotification', async (req, res) => {
-    const notifications = await notificaton.find();
-    res.json({
-        notifications,
-    })
-});
 
 
 module.exports = router;
