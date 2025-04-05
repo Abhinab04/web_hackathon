@@ -1,6 +1,6 @@
 <div align="center">
   <!-- Logo placeholder -->
-  <img src="path/to/your/logo.png" alt="Team Glitch Logo" width="200"/>
+  <img src="./Media/logo.png" alt="Team Glitch Logo" width="200"/>
   <h1 style="font-size: 3rem; color: #4A90E2; margin-bottom: 0.5rem;">Team Glitch</h1>
   <h2 style="font-size: 2rem; color: #333; margin-top: 0;">Centralized E-Learning Platform</h2>
   <p style="font-style: italic; color: #666; margin-bottom: 2rem;">Team #2 - Pravaah'25 - IIT Bhubaneswar</p>
