@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const moment = require('moment');
 const courses = require('../models/courses');
+const notification = require('../models/notificaton');
+const notificaton = require('../models/notificaton');
 // require('dotenv').config();
 
 const router = express.Router();
@@ -92,13 +94,15 @@ router.post("/signup", async (req, res) => {
                 const allCourses = await courses.find();
 
                 const enrolledCourses = await courses.find({ enrolledStudents: req.session.userId });
+                const notifications = await notificaton.find();
                 req.session.userId = newuser._id;
                 return res.json({
                     sucess: true,
                     message: 'new Admin Created',
                     allCourses,
                     ongoingCourses,
-                    enrolledCourses
+                    enrolledCourses,
+                    notifications
                 })
 
             } catch (error) {
