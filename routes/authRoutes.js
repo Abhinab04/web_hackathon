@@ -102,7 +102,7 @@ router.post("/signup", async (req, res) => {
                     sucess: true,
                     message: 'new Admin Created',
                     allCourses,
-                    ongoingCourses,
+                    allCourses,
                     enrolledCourses,
                     notifications,
                     assignments
@@ -172,15 +172,13 @@ router.post('/login', async (req, res) => {
             try {
                 const upcomingCourses = await courses.find({ StartDate: { $gt: today } });
 
-                const ongoingCourses = await courses.find({
-                    StartDate: { $lte: today },
-                });
+                const allCourses = await courses.find();
                 req.session.userId = exist._id;
                 return res.json({
                     sucess: true,
                     message: 'new Admin LoggedIn',
                     upcomingCourses,
-                    ongoingCourses
+                    allCourses
                 })
 
             } catch (error) {
@@ -198,12 +196,11 @@ router.post('/login', async (req, res) => {
                 const enrolledCourses = await courses.find({ enrolledStudents: req.session.userId });
                 const notifications = await notificaton.find();
                 const assignments = await assignment.find();
-                req.session.userId = newuser._id;
+                req.session.userId = exist._id;
                 return res.json({
                     sucess: true,
                     message: 'new Admin Created',
                     allCourses,
-                    ongoingCourses,
                     enrolledCourses,
                     notifications,
                     assignments
