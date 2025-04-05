@@ -142,5 +142,12 @@ router.get('/results/:quizId/:studentId', requireStudent, async (req, res) => {
     }
 });
 
+router.get('/allNotification', async (req, res) => {
+    const notifications = await notificaton.find();
+    res.json({
+        notifications,
+    })
+});
+
 
 module.exports = router;
