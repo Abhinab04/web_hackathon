@@ -176,7 +176,7 @@ router.post('/login', async (req, res) => {
                 req.session.userId = exist._id;
                 return res.json({
                     sucess: true,
-                    message: 'new Admin LoggedIn',
+                    message: 'new Admin Created',
                     upcomingCourses,
                     allCourses
                 })
@@ -199,11 +199,34 @@ router.post('/login', async (req, res) => {
                 req.session.userId = exist._id;
                 return res.json({
                     sucess: true,
-                    message: 'new Admin Created',
+                    message: 'new student Created',
                     allCourses,
                     enrolledCourses,
                     notifications,
                     assignments
+                })
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
+        if (exist.role.toLowerCase() == 'faculty') {
+            const today = moment().toDate();
+
+            try {
+                const allCourses = await courses.find();
+
+                const enrolledCourses = await courses.find({ enrolledStudents: req.session.userId });
+                const notifications = await notificaton.find();
+                // const assignments = await assignment.find();
+                req.session.userId = exist._id;
+                return res.json({
+                    success: true,
+                    message: 'new student Created',
+                    allCourses,
+                    // enrolledCourses,
+                    notifications,
                 })
 
             } catch (error) {
