@@ -258,5 +258,12 @@ router.post('/checkAssignment', requireFaculty, async (req, res) => {
 
 })
 
+router.get('/allNotification', async (req, res) => {
+    const notifications = await notificaton.find();
+    res.json({
+        notifications,
+    })
+});
+
 
 module.exports = router;
