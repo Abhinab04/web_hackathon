@@ -12,7 +12,7 @@ router.get("/hello", (req, res) => {
     res.send("hellow")
 })
 
-router.post('/signup', async (req, res) => {
+router.post("/signup", async (req, res) => {
     console.log('signup k andar');
     try {
         const { name, email, password, confirm, role } = req.body;
@@ -20,7 +20,7 @@ router.post('/signup', async (req, res) => {
         console.log(name, email, password, confirm, role)
         console.log('try k andar');
 
-        if (name === '' || email === '' || !password === '' || !confirm === '' || !role === '') {
+        if (!name || !email || !password || !confirm || !role) {
             error.push({ msg: "Please fill all the blanks" })
         }
 
@@ -35,9 +35,10 @@ router.post('/signup', async (req, res) => {
         if (password.length < 6) {
             error.push({ msg: "password is too short" })
         }
-        if (!role === 'student' || !role === 'faculty' || !role === 'admin') {
-            error.push({ msg: "Invalid input for role" })
+        if (!['student', 'faculty', 'admin'].includes(role.toLowerCase())) {
+            error.push({ msg: "Invalid input for role" });
         }
+
         if (error.length > 0) {
             return res.json({ sucess: false, msg: "re render the register", error })
         }
@@ -68,7 +69,7 @@ router.post('/signup', async (req, res) => {
             try {
                 const upcomingCourses = await courses.find({ StartDate: { $gt: today } });
 
-                const ongoingCourses = await hackathon.find({
+                const ongoingCourses = await courses.find({
                     StartDate: { $lte: today },
                 });
                 req.session.userId = newuser._id;
@@ -137,19 +138,19 @@ router.post('/login', async (req, res) => {
         //     role: exist.role.toLowerCase()
         // });
 
-        if (newuser.role.toLowerCase() == 'admin') {
+        if (exist.role.toLowerCase() == 'admin') {
             const today = moment().toDate();
 
             try {
                 const upcomingCourses = await courses.find({ StartDate: { $gt: today } });
 
-                const ongoingCourses = await hackathon.find({
+                const ongoingCourses = await courses.find({
                     StartDate: { $lte: today },
                 });
                 req.session.userId = exist._id;
                 return res.json({
                     sucess: true,
-                    message: 'new Admin Created',
+                    message: 'new Admin LoggedIn',
                     upcomingCourses,
                     ongoingCourses
                 })
