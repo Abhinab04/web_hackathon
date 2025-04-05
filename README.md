@@ -299,11 +299,6 @@
   <div style="background-color: #282c34; color: #abb2bf; padding: 1rem; border-radius: 5px; overflow-x: auto;">
     <code>
       MONGODB_URI=your_mongodb_connection_string<br>
-      SESSION_SECRET=your_session_secret<br>
-      GOOGLE_CLIENT_ID=your_google_client_id<br>
-      GOOGLE_CLIENT_SECRET=your_google_client_secret<br>
-      GITHUB_CLIENT_ID=your_github_client_id<br>
-      GITHUB_CLIENT_SECRET=your_github_client_secret
     </code>
   </div>
 </div>
