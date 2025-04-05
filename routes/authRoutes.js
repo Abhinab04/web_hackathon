@@ -85,6 +85,27 @@ router.post("/signup", async (req, res) => {
             }
 
         }
+        if (newuser.role.toLowerCase() == 'student') {
+            const today = moment().toDate();
+
+            try {
+                const allCourses = await courses.find();
+
+                const enrolledCourses = await courses.find({ enrolledStudents: req.session.userId });
+                req.session.userId = newuser._id;
+                return res.json({
+                    sucess: true,
+                    message: 'new Admin Created',
+                    allCourses,
+                    ongoingCourses,
+                    enrolledCourses
+                })
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json('Internal Server Error');
