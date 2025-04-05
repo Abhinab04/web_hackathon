@@ -4,15 +4,22 @@ const cors = require('cors')
 require('dotenv').config();
 require('./databases/conn');
 
+const PORT = process.env.PORT || 3000;
+
+
 const app = express();
 app.use(session({
     secret: 'your-secret-key',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        secure: true,           // true for HTTPS only
+        sameSite: 'none'        // required when using cross-origin
+    }
 }));
 
 app.use(cors({
-    origin:"https://roaring-scone-01e7f7.netlify.app/",
+    origin:"https://roaring-scone-01e7f7.netlify.app",
     credentials:true
 }));
 app.use(express.json());
@@ -27,7 +34,6 @@ app.get('/', (req, res) => {
 });
 
 
-
-app.listen(3000, () => {
-    console.log('app is listining to port 3000');
-})
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
