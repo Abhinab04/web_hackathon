@@ -24,7 +24,8 @@ function App() {
 
         {/* Authentication Routes */}
         <Route path="user/login" element={<Login />} />
-        <Route path="user/signup" element={<Register />} />
+        <Route path="/" element={<Register />} />
+        <Route path="/user/signup" element={<Register />} />
 
         {/* Additional Pages */}
         <Route path="/students" element={<AllStudents />} />
