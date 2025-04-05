@@ -76,12 +76,12 @@
 
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0;">
   <!-- Screenshot placeholders -->
-  <img src="path/to/screenshot1.png" alt="Dashboard" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="path/to/screenshot2.png" alt="Course View" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="path/to/screenshot3.png" alt="Quiz Interface" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="path/to/screenshot4.png" alt="Admin Panel" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="path/to/screenshot5.png" alt="Assignment Submission" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="path/to/screenshot6.png" alt="Notifications" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="./Media/Login.jpeg" alt="Dashboard" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="./Media/signup.jpeg" alt="Course View" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="./Media/createCourse.jpeg" alt="Quiz Interface" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="./Media/editCourse.jpeg" alt="Admin Panel" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="./Media/StudentDashBoard.jpeg" alt="Assignment Submission" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="./Media/AdminDashboard.jpeg" alt="Notifications" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
 </div>
 
 ## 🛠️ Architecture
