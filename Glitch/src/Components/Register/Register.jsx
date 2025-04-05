@@ -4,13 +4,14 @@ import { useState } from "react";
 import { windowlistner } from "../WindowListener/WindowListener"
 import "../Register/Register.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useNavigate } from "react-router-dom";
 
 import axios from 'axios'
 
 function Register() {
 
     const [position, setposition] = useState({ x: 0, y: 0 });
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const [name, setname] = useState('')
     const [email, setemail] = useState('')
@@ -32,11 +33,11 @@ function Register() {
             const response = await axios.post('http://localhost:3000/user/signup', { name, email, password, confirm, role })
             console.log(response.data)
             if (response.data.sucess === true) {
-                // navigate('/user/Login')
+                navigate('/user/login')
                 console.log("navigate karna h")
             }
             if (response.data.sucess === false) {
-                // navigate('/user/Register')
+                navigate('/user/signup')
                 console.log("navigate to signup")
                 console.log(response.data.error[0].msg)
                 setErrors(response.data.error[0].msg)
@@ -52,9 +53,9 @@ function Register() {
         setposition({ x: e.clientX, y: e.clientY })
     })
 
-    // const login = () => {
-    //     navigate('/user/Login')
-    // }
+    const login = () => {
+        navigate('/user/login')
+    }
 
     function timingout() {
         setTimeout(() => {
@@ -121,10 +122,10 @@ function Register() {
                             whileTap={{
                                 scale: 1.01,
                             }}
-                            type="submit">SIGN UP</motion.button>
+                            type="submit" onClick={submits}>SIGN UP</motion.button>
                         <motion.div className="Account" style={styles.accountText} >
                             Already have account?{" "}
-                            <motion.a title="No account" style={styles.links}>
+                            <motion.a title="No account" style={styles.links} onClick={login}>
                                 Login!
                             </motion.a>
                         </motion.div>

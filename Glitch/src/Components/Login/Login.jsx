@@ -4,9 +4,10 @@ import { useState } from "react";
 import { windowlistner } from "../WindowListener/WindowListener"
 import "../Register/Register.css"
 import axios from 'axios'
+import { useNavigate } from "react-router-dom";
 
 function Login() {
-
+    const navigate = useNavigate();
     const [position, setposition] = useState({ x: 0, y: 0 });
 
     const [email, setemail] = useState('')
@@ -25,14 +26,20 @@ function Login() {
 
         try {
             const res = await axios.post('http://localhost:3000/user/login', { email, password });
-            console.log("Data transfer successful: ", res.data.success);
+            console.log("Data transfer successful: ", res.data.sucess, res.data.message);
 
-            if (res.data.success === true) {  // ✅ Fix: Check boolean, not string
+            if (res.data.sucess === true && res.data.message === 'new Admin Created') {
                 console.log("Navigate to Dashboard");
-                // navigate('/Dashboard');
-            } else if (res.data.success === false) {
-                console.log(res.data.error?.[0]?.msg || "Unknown error");  // ✅ Fix: Handle potential undefined error array
+                navigate('/admin');
+            }
+            else if (res.data.sucess === true && res.data.message === 'new student Created') {
+                console.log("Navigate to Dashboard");
+                navigate('/student');
+            }
+            else if (res.data.sucess === false) {
+                console.log(res.data.error?.[0]?.msg || "Unknown error");
                 seterror(res.data.error?.[0]?.msg || "Something went wrong");
+                navigate('/user/login')
             }
         } catch (error) {
             console.log("Request failed:", error);
@@ -44,6 +51,10 @@ function Login() {
     windowlistner('pointermove', (e) => {
         setposition({ x: e.clientX, y: e.clientY })
     })
+
+    const account = () => {
+        navigate('/user/signup')
+    }
 
 
     function timingout() {
@@ -94,7 +105,7 @@ function Login() {
                             type="submit" onClick={submit}>LOGIN</motion.button>
                         <motion.div className="Account" style={styles.accountText} >
                             No account yet?{" "}
-                            <motion.a title="No account" style={styles.links}>
+                            <motion.a title="No account" style={styles.links} onClick={account}>
                                 Create your account now
                             </motion.a>
                         </motion.div>

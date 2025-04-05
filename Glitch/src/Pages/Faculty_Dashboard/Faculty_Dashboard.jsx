@@ -22,7 +22,7 @@ const JudgingDashboard = ({ projects = [] }) => {
                 </header>
 
                 <section className="judging-section">
-                    <h2 className='pending'>Pending Submissions</h2>
+                    <h2 className='pending'>All Courses</h2>
                     {projects.map((project, index) => (
                         <div className="submission-card" key={index}>
                             <h3>{project.team}</h3>

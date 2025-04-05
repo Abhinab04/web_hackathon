@@ -2,6 +2,7 @@ import { React, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Admin_Dashboard.css'
 import { windowlistner } from '../../Components/WindowListener/WindowListener';
+import axios from 'axios'
 
 const HackathonDashboard = ({
     ongoingHackathonscount,
@@ -9,10 +10,61 @@ const HackathonDashboard = ({
     ongoingHackathons = [],
     upcomingHackathons = [],
 }) => {
+
+    const [courseName, setcourse] = useState('')
+    const [description, setdescription] = useState('')
+    const [price, setnumber] = useState('')
+
     const [position, setposition] = useState({ x: 0, y: 0 });
+    const [showModal, setShowModal] = useState(false);
     windowlistner('pointermove', (e) => {
         setposition({ x: e.clientX, y: e.clientY })
     })
+
+    async function submits(event) {
+        event.preventDefault();
+        setnumber('');
+        setdescription('')
+        setcourse('');
+        setShowModal(false); // Close the modal
+        try {
+            const response = await axios.post("http://localhost:3000/admin/createCourses", { courseName, description, price })
+            console.log(response.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const [editModal, setEditModal] = useState(false);
+    const [editData, setEditData] = useState({
+        oldcourseName: '',
+        newcourseName: '',
+        description: '',
+        price: ''
+    });
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const submitEdit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post('http://localhost:3000/admin/editBatch', editData);
+            alert('Course updated successfully!');
+            setEditData({
+                oldcourseName: '',
+                newcourseName: '',
+                description: '',
+                price: ''
+            });
+            setEditModal(false);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to update course.');
+        }
+    };
 
     return (
         <div className="dashboard">
@@ -26,9 +78,8 @@ const HackathonDashboard = ({
                 </div>
                 <ul className="sidebar-menu">
                     <li><a href='#' className="active">Dashboard</a></li>
-                    <li><a href='#'>All Courses</a></li>
-                    <li><a href='#'>Students</a></li>
-                    <li><a href='#'>Faculty</a></li>
+                    <li><a href='#'>All Student</a></li>
+                    <li><a href='#'>All Faculty</a></li>
                     <li><a href='#'>Profile</a></li>
                     <li><a href='#'>Logout</a></li>
                 </ul>
@@ -38,8 +89,8 @@ const HackathonDashboard = ({
                 <div className="dashboard-header">
                     <h2 className='main_header'>Admin Dashboard</h2>
                     <div className="quick-actions">
-                        <button className="btn">Create Hackathon</button>
-                        <button className="btn btn-secondary">Manage Participants</button>
+                        <button className="btn" onClick={() => setShowModal(true)}>Create Course</button>
+                        <button className="btn btn-secondary" onClick={() => setEditModal(true)}>Manage Course</button>
                     </div>
                 </div>
 
@@ -83,7 +134,81 @@ const HackathonDashboard = ({
                         ))}
                     </div>
                 </div>
+                {/* Pop-up Modal */}
+                {showModal && (
+                    <div className="modal-overlay">
+                        <div className="modal">
+                            <h2>Create Course</h2>
+                            <form>
+                                <label>Course Name:</label>
+                                <input type="text" placeholder="Enter Course Name" name="course" id="courseName" value={courseName}
+                                    onChange={(e) => setcourse(e.target.value)} required />
+
+                                <label>Course Description:</label>
+                                <textarea placeholder="Enter Course Details" name="description" id="description" value={description}
+                                    onChange={(e) => setdescription(e.target.value)} required></textarea>
+
+                                <label>Price</label>
+                                <input type="number" name="price" id="number" value={price}
+                                    onChange={(e) => setnumber(e.target.value)} required />
+
+                                <div className="modal-buttons">
+                                    <button type="submit" className="btn" onClick={submits}>Submit</button>
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Close</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+                {editModal && (
+                    <div className="modal-overlay">
+                        <div className="modal">
+                            <h2>Edit Course</h2>
+                            <form onSubmit={submitEdit}>
+                                <label>Old Course Name:</label>
+                                <input
+                                    type="text"
+                                    name="oldcourseName"
+                                    value={editData.oldcourseName}
+                                    onChange={handleEditChange} // ✅ missing handler
+                                    required
+                                />
+                                <label>New Course Name:</label>
+                                <input
+                                    type="text"
+                                    name="newcourseName"
+                                    value={editData.newcourseName}
+                                    onChange={handleEditChange} // ✅ missing handler
+                                    required
+                                />
+                                <label>Description:</label>
+                                <textarea
+                                    name="description"
+                                    value={editData.description}
+                                    onChange={handleEditChange} // ✅ missing handler
+                                    required
+                                />
+                                <label>Price:</label>
+                                <input
+                                    type="number"
+                                    name="price"
+                                    value={editData.price}
+                                    onChange={handleEditChange} // ✅ missing handler
+                                    required
+                                />
+
+                                <div className="modal-buttons">
+                                    <button type="submit" className="btn">Update</button>
+                                    <button type="button" className="btn btn-secondary" onClick={() => setEditModal(false)}>Close</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+
             </div>
+
         </div>
     );
 };

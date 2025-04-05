@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './Student_dashboard.css';
 
-const UserDashboard = ({ name, upcomingHackathons = [], ongoingHackathons = [] }) => {
+const UserDashboard = ({ name }) => {
+    const [enrolledCourses, setEnrolledCourses] = useState([]);
+    const [allCourses, setAllCourses] = useState([]);
+
+    useEffect(() => {
+        fetch("http://localhost:3000/student/all", {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("Fetched courses:", data);
+                setAllCourses(data.courses || []);
+            })
+            .catch((err) => console.error("Failed to fetch courses:", err));
+    }, []);
+
     return (
         <div className="user-dashboard">
             <div className="sidebar">
@@ -20,13 +39,13 @@ const UserDashboard = ({ name, upcomingHackathons = [], ongoingHackathons = [] }
                 </div>
 
                 <div className="dashboard-section">
-                    <h2>Enrolled Course</h2>
+                    <h2>Enrolled Courses</h2>
                     <div className="hackathon-list">
-                        {upcomingHackathons.map((hackathon, index) => (
+                        {enrolledCourses.map((course, index) => (
                             <div className="hackathon-card" key={index}>
-                                <h3>{hackathon.Name}</h3>
-                                <p>Ends: {hackathon.EndDate}</p>
-                                <a href={`/details/${hackathon.Name}`}><button>View Details</button></a>
+                                <h3>{course.name}</h3>
+                                <p>Ends: {course.endDate}</p>
+                                <a href={`/details/${course.name}`}><button>View Details</button></a>
                             </div>
                         ))}
                     </div>
@@ -34,12 +53,16 @@ const UserDashboard = ({ name, upcomingHackathons = [], ongoingHackathons = [] }
 
                 <div className="dashboard-section">
                     <h2>All Courses</h2>
-                    <div className="hackathon-list">
-                        {ongoingHackathons.map((hackathon, index) => (
-                            <div className="hackathon-card" key={index}>
-                                <h3>{hackathon.Name}</h3>
-                                <p>Ends: {hackathon.EndDate}</p>
-                                <a href={`/details/${hackathon.Name}`}><button>View Details</button></a>
+                    <div className="courses-grid">
+                        {allCourses.map((course, index) => (
+                            <div className="course-card" key={index}>
+                                <h3>{course.name}</h3>
+                                <p>{course.description}</p>
+                                <p>Instructor: {course.instructor}</p>
+                                <p>Ends: {course.endDate}</p>
+                                <a href={`/course/${course._id}`}>
+                                    <button>View Details</button>
+                                </a>
                             </div>
                         ))}
                     </div>
