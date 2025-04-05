@@ -6,6 +6,7 @@ const moment = require('moment');
 const courses = require('../models/courses');
 const notification = require('../models/notificaton');
 const notificaton = require('../models/notificaton');
+const assignment = require('../models/assignments');
 // require('dotenv').config();
 
 const router = express.Router();
@@ -95,6 +96,7 @@ router.post("/signup", async (req, res) => {
 
                 const enrolledCourses = await courses.find({ enrolledStudents: req.session.userId });
                 const notifications = await notificaton.find();
+                const assignments = await assignment.find();
                 req.session.userId = newuser._id;
                 return res.json({
                     sucess: true,
@@ -102,7 +104,8 @@ router.post("/signup", async (req, res) => {
                     allCourses,
                     ongoingCourses,
                     enrolledCourses,
-                    notifications
+                    notifications,
+                    assignments
                 })
 
             } catch (error) {
@@ -178,6 +181,32 @@ router.post('/login', async (req, res) => {
                     message: 'new Admin LoggedIn',
                     upcomingCourses,
                     ongoingCourses
+                })
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
+
+        if (exist.role.toLowerCase() == 'student') {
+            const today = moment().toDate();
+
+            try {
+                const allCourses = await courses.find();
+
+                const enrolledCourses = await courses.find({ enrolledStudents: req.session.userId });
+                const notifications = await notificaton.find();
+                const assignments = await assignment.find();
+                req.session.userId = newuser._id;
+                return res.json({
+                    sucess: true,
+                    message: 'new Admin Created',
+                    allCourses,
+                    ongoingCourses,
+                    enrolledCourses,
+                    notifications,
+                    assignments
                 })
 
             } catch (error) {
