@@ -8,6 +8,8 @@ const assingnment = require('../models/assignments');
 const Quiz = require('../models/quiz');
 const scores = require('../models/scores');
 const multer = require('multer');
+const pdf = require('pdf-parse');
+const fs = require('fs');
 
 const router = express.Router();
 
@@ -43,9 +45,9 @@ router.get('/createCourse', requireFaculty, async (req, res) => {
     })
 });
 
-router.post('/createCourse', requireFaculty, async (req, res) => {
+router.post('/createCourses', async (req, res) => {
     try {
-        console.log('Inside signup route');
+        console.log('Inside create course route');
 
         const { courseName, description, price } = req.body;
 
@@ -63,11 +65,15 @@ router.post('/createCourse', requireFaculty, async (req, res) => {
                 message: 'This course is already present.'
             });
         }
-        const newCourse = await user.create({
+        const newCourse = await courses.create({
             courseName,
             description,
             price,
         });
+        res.json({
+            message: 'course created',
+            sucess: true,
+        })
 
     } catch (error) {
         console.log(error);
@@ -76,93 +82,99 @@ router.post('/createCourse', requireFaculty, async (req, res) => {
 
 router.put('/update/:courseName', requireFaculty, uploadLecture.single("file"), async (req, res) => {
     try {
-        const { courseId } = req.params;
-        const { courseName, description, content, price } = req.body;
+        const { courseName } = req.params;
+        const { description, content, price } = req.body;
 
-        const course = await courses.findById(courseId);
+        const course = await courses.findOne({ courseName });
         if (!course) {
             return res.status(404).json({ success: false, message: "Course not found" });
         }
 
-        course.title = title || course.title;
+        course.courseName = courseName || course.courseName;
         course.description = description || course.description;
-        if (content) {
+        course.price = price || course.price;
+
+        if (req.file) {
             try {
                 const filePath = req.file.path;
-                const savePath = path.join(__dirname, `../parsed_texts/${req.file.originalname}.pdf`);
+                const savePath = path.join(__dirname, `../parsed_texts/${req.file.originalname}.txt`);
 
-                let dataBuffer = fs.readFileSync(filePath);
+                const dataBuffer = fs.readFileSync(filePath);
+                const parsedData = await pdf(dataBuffer);
 
-                pdf(dataBuffer).then((data) => {
-                    try {
-                        fs.writeFileSync(savePath, data.text);
-                        console.log('PDF text extracted and saved successfully.');
+                fs.writeFileSync(savePath, parsedData.text);
+                console.log('PDF text extracted and saved successfully.');
 
-                        course.content = [{ type: 'pdf', title: req.file.originalname, path: savePath }];
-                    } catch (error) {
-                        console.error('Error writing extracted text:', error);
-                    }
-                }).catch((err) => {
-                    console.error('Error parsing PDF:', err);
-                });
+                course.content = [{
+                    type: 'pdf',
+                    title: req.file.originalname,
+                    path: savePath
+                }];
 
-            } catch (error) {
-                console.error('Error processing file:', error);
+            } catch (fileError) {
+                console.error('Error processing file:', fileError);
+                return res.status(500).json({ success: false, message: "Error processing PDF file" });
             }
         }
 
         await course.save();
         res.json({ success: true, message: "Course updated successfully", course });
+
     } catch (error) {
-        console.error(error);
+        console.error('Update Error:', error);
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
 
-const storageAssingnment = multer.diskStorage({
-    destination: "./uploaded/Assingnments/",
+const storageAssignment = multer.diskStorage({
+    destination: "./uploaded/Assignments/",
     filename: (req, file, cb) => {
         cb(null, Date.now() + path.extname(file.originalname));
     },
 });
-const uploadAssignment = multer({ storageAssingnment });
+const uploadAssignment = multer({ storage: storageAssignment });
 
-router.post('/uploadAssingment', requireFaculty, uploadLecture.single("file"), async (req, res) => {
+router.post('/uploadAssignment', uploadAssignment.single("file"), async (req, res) => {
     const { deadline } = req.body;
+
     if (!req.file) {
         return res.status(400).json({
             success: false,
             message: "Nothing is uploaded buddy"
         });
     }
+
     try {
         const filePath = req.file.path;
-        const savePath = path.join(__dirname, `../Assignment_texts/${req.file.originalname}.pdf`);
+        const savePath = path.join(__dirname, `../Assignment_texts/${req.file.originalname}.txt`); // use `.txt` instead of `.pdf` here
 
-        let dataBuffer = fs.readFileSync(filePath);
+        const dataBuffer = fs.readFileSync(filePath);
 
-        pdf(dataBuffer).then((data) => {
-            try {
-                fs.writeFileSync(savePath, data.text);
-                console.log('PDF text extracted and saved successfully.');
+        const data = await pdf(dataBuffer);
 
-                const newAssingnment = assingnment.create({
-                    AssignmentTitle: req.file.originalname,
-                    DeadLine: deadline
-                });
+        fs.writeFileSync(savePath, data.text);
+        console.log('PDF text extracted and saved successfully.');
 
-            } catch (error) {
-                console.error('Error writing extracted text:', error);
-            }
-        }).catch((err) => {
-            console.error('Error parsing PDF:', err);
+        const newAssignment = await assignment.create({
+            AssignmentTitle: req.file.originalname,
+            DeadLine: deadline,
+            filePath: filePath,
+            extractedTextPath: savePath
         });
 
-    }
-    catch (error) {
-        console.error('Error processing file:', error);
-    }
+        return res.status(201).json({
+            success: true,
+            message: "Assignment uploaded successfully",
+            assignment: newAssignment
+        });
 
+    } catch (error) {
+        console.error('Error processing file:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
 });
 
 router.post('/notification', requireFaculty, async (req, res) => {
@@ -178,7 +190,7 @@ router.post('/notification', requireFaculty, async (req, res) => {
 
 
 
-router.post('/create', requireFaculty, async (req, res) => {
+router.post('/createQuiz', requireFaculty, async (req, res) => {
     try {
         const { courseId, questions } = req.body;
 

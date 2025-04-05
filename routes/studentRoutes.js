@@ -27,25 +27,59 @@ router.get('/all', async (req, res) => {
     res.json({ courses });
 });
 
-router.post('/enroll/:courseName', requireStudent, async (req, res) => {
-    const course = await Course.findOne({ courseName: req.params.courseName });
-    if (!course) return res.status(404).json({ message: "Course not found" });
+router.post('/enroll/:courseName', async (req, res) => {
+    try {
+        const course = await Course.findOne({ courseName: req.params.courseName });
+        if (!course) return res.status(404).json({ message: "Course not found" });
 
-    course.enrolledStudents.push(req.session.userId);
-    await course.save();
-
-    res.json({ message: "Enrolled successfully", course });
+        // Prevent duplicate enrollment
+        if (!course.enrolledStudents.includes(req.session.userId)) {
+            course.enrolledStudents.push(req.session.userId);
+            await course.save();
+            return res.json({ message: "Enrolled successfully", course });
+        } else {
+            return res.status(400).json({ message: "Already enrolled in this course" });
+        }
+    } catch (err) {
+        console.error("Enrollment error:", err);
+        res.status(500).json({ message: "Internal server error" });
+    }
 });
+
 
 router.post('/submit/:assignmentId', requireStudent, upload.single('file'), async (req, res) => {
-    const assignment = await Assignment.findById(req.params.assignmentId);
-    if (!assignment) return res.status(404).json({ message: "Assignment not found" });
+    try {
+        const assignment = await Assignment.findById(req.params.assignmentId);
+        if (!assignment) {
+            return res.status(404).json({ message: "Assignment not found" });
+        }
 
-    assignment.submissions.push({ studentId: req.session.userId, fileUrl: req.file.path });
-    await assignment.save();
+        if (!req.file || !req.file.path) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
 
-    res.json({ message: "Assignment submitted successfully" });
+        const alreadySubmitted = assignment.submissions.find(sub =>
+            sub.studentId.toString() === req.session.userId
+        );
+        if (alreadySubmitted) {
+            return res.status(400).json({ message: "Assignment already submitted" });
+        }
+
+        assignment.submissions.push({
+            studentId: req.session.userId,
+            fileUrl: req.file.path
+        });
+
+        await assignment.save();
+
+        res.json({ message: "Assignment submitted successfully" });
+
+    } catch (err) {
+        console.error("Submission error:", err);
+        res.status(500).json({ message: "Internal server error" });
+    }
 });
+
 
 router.get('/quiz', requireStudent, async (req, res) => {
     const enrolledCourses = await Course.find({ enrolledStudents: { $in: [exist._id] } });
