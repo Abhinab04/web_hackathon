@@ -78,6 +78,7 @@
   <!-- Screenshot placeholders -->
   <img src="./Media/Login.jpeg" alt="Dashboard" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
   <img src="./Media/signup.jpeg" alt="Course View" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="./Media/Create_course" alt="Notifications" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
   <img src="./Media/createCourse.jpeg" alt="Quiz Interface" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
   <img src="./Media/editCourse.jpeg" alt="Admin Panel" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
   <img src="./Media/StudentDashBoard.jpeg" alt="Assignment Submission" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
