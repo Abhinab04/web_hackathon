@@ -237,20 +237,6 @@
     <a href="https://github.com/Soap-mac" style="color: #4A90E2; text-decoration: none;">@Soap-mac</a>
   </div>
   
-  <div style="text-align: center; width: 200px;">
-    <img src="https://github.com/Saswat-kumar-Samal.png" alt="Saswat Kumar Samal" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #4A90E2;"/>
-    <h3 style="margin: 0.5rem 0;">Saswat Kumar Samal</h3>
-    <p style="margin: 0; color: #666;">ML Engineer</p>
-    <a href="https://github.com/Saswat-kumar-Samal" style="color: #4A90E2; text-decoration: none;">@Saswat-kumar-Samal</a>
-  </div>
-  
-  <div style="text-align: center; width: 200px;">
-    <img src="https://github.com/SUMAN-JAMMY.png" alt="Suman Jena" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #4A90E2;"/>
-    <h3 style="margin: 0.5rem 0;">Suman Jena</h3>
-    <p style="margin: 0; color: #666;">Developer</p>
-    <a href="https://github.com/SUMAN-JAMMY" style="color: #4A90E2; text-decoration: none;">@SUMAN-JAMMY</a>
-  </div>
-</div>
 
 ## 📊 Project Structure
 
