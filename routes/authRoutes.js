@@ -87,6 +87,28 @@ router.post("/signup", async (req, res) => {
             }
 
         }
+        if (newuser.role.toLowerCase() == 'faculty') {
+            const today = moment().toDate();
+
+            try {
+                const upcomingCourses = await courses.find({ StartDate: { $gt: today } });
+
+                const ongoingCourses = await courses.find({
+                    StartDate: { $lte: today },
+                });
+                req.session.userId = newuser._id;
+                return res.json({
+                    sucess: true,
+                    message: 'new Admin Created',
+                    upcomingCourses,
+                    ongoingCourses
+                })
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
         if (newuser.role.toLowerCase() == 'student') {
             const today = moment().toDate();
 
@@ -119,9 +141,7 @@ router.post("/signup", async (req, res) => {
 })
 
 // Login Route
-// router.get('/login',(req,res)=>{
-//     res.send("hello world")
-// })
+
 router.post('/login', async (req, res) => {
     let error = []; // Store errors here
 
@@ -155,9 +175,11 @@ router.post('/login', async (req, res) => {
         }
 
         // Store session data
+        console.log(exist)
         req.session.userId = exist._id;
+        req.session.role = exist.role; // Optional: Store user role
         console.log('User ID stored in session:', req.session.userId);
-
+        console.log(req.session.role)
         // Respond based on role
         // return res.json({
         //     success: true,
@@ -166,6 +188,26 @@ router.post('/login', async (req, res) => {
         // });
 
         if (exist.role.toLowerCase() == 'admin') {
+            const today = moment().toDate();
+
+            try {
+                const upcomingCourses = await courses.find({ StartDate: { $gt: today } });
+
+                const allCourses = await courses.find();
+                req.session.userId = exist._id;
+                return res.json({
+                    sucess: true,
+                    message: 'new Admin Created',
+                    upcomingCourses,
+                    allCourses
+                })
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
+        if (exist.role.toLowerCase() == 'faculty') {
             const today = moment().toDate();
 
             try {

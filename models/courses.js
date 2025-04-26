@@ -14,12 +14,10 @@ const CoursesSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    content: [{
-        type: { type: String, enum: ['lecture', 'pdf', 'video'], required: true },
-        title: { type: String, required: true },
-        url: { type: String, required: true },
-        path: { type: String }
-    }],
+    startDate: {
+        type: Date,
+        require: true
+    }
 
 });
 

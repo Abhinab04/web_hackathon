@@ -7,17 +7,12 @@ const multer = require('multer')
 
 const router = express.Router();
 
-// const storageLecture = multer.diskStorage({
-//     destination: "./uploaded/LecturePDF/",
-//     filename: (req, file, cb) => {
-//         cb(null, Date.now() + path.extname(file.originalname));
-//     },
-// });
-// const uploadLecture = multer({ storageLecture });
+
 
 const requireAdmin = (req, res, next) => {
-    if (!req.session.userId || req.session.userId !== 'admin') {
-        return res.status(403).json({ success: false, message: "Access denied. Only faculty can manage courses." });
+    if (!req.session.role || req.session.role.toLowerCase() !== 'admin') {
+        console.log(req.session.role)
+        return res.status(403).json({ success: false, message: "Access denied. Only admin can manage courses." });
     }
     next();
 };
@@ -42,10 +37,12 @@ router.post('/createCourse', requireAdmin, async (req, res) => {
     try {
         console.log('Inside signup route');
 
-        const { courseName, description, price, startDate } = req.body;
+        const { courseName, description, price, startDate } = req.body.courseData;
+
+        console.log(courseName, description, price, startDate)
 
         if (!courseName || !description || !price || !startDate) {
-            return res.status(400).json({
+            return res.json({
                 success: false,
                 message: "Please enter all the credentials"
             });
@@ -53,22 +50,36 @@ router.post('/createCourse', requireAdmin, async (req, res) => {
         const exist = await courses.findOne({ courseName: courseName });
 
         if (exist) {
-            return res.status(409).json({
+            return res.json({
                 success: false,
                 message: 'This course is already present.'
             });
         }
-        const newCourse = await user.create({
+        const newCourse = await courses.create({
             courseName,
             description,
             price,
             startDate,
         });
 
+        if (newCourse) {
+            return res.json({
+                success: 'true',
+                message: 'Data has been updated succesfully'
+            })
+        }
+
     } catch (error) {
         console.log(error);
     }
 });
+
+
+router.get('/getCourse',(req,res)=>{
+    
+})
+
+
 
 router.get('/allStudentss/:page', async (req, res) => {
 
@@ -131,13 +142,13 @@ router.get('/allFacultyss/:page', requireAdmin, async (req, res) => {
 
 router.post('/editBatch', async (req, res) => {
     const { oldcourseName, newcourseName, description, price } = req.body;
-    console.log(oldcourseName,newcourseName,description,price)
+    console.log(oldcourseName, newcourseName, description, price)
     const exist = await courses.findOne({ courseName: oldcourseName });
     const updatedCourse = await courses.findByIdAndUpdate(exist._id, {
         courseName: newcourseName,
         description,
         price,
-    }, { new: true });    
+    }, { new: true });
 
 });
 

@@ -8,20 +8,26 @@ const PORT = process.env.PORT || 3000;
 
 
 const app = express();
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 app.use(session({
     secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        secure: true,           // true for HTTPS only
-        sameSite: 'none'        // required when using cross-origin
-    }
+    // cookie: {
+    //     secure: true,           // true for HTTPS only
+    //     sameSite: 'none'        // required when using cross-origin
+    // },
+    // proxy: true,           // trust first proxy (for Heroku)
 }));
 
-app.use(cors({
-    origin:"https://roaring-scone-01e7f7.netlify.app",
-    credentials:true
-}));
+app.use((req, res, next) => {
+    console.log('Session data:', req.session.role||'No session received');
+    next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/user", require('./routes/authRoutes'));
