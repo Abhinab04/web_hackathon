@@ -5,6 +5,7 @@ import Login from "./Components/Login/Login";
 import HackathonDashboard from "./Pages/Admin_Dashboard/Admin_Dashboard";
 import FacultyDashboard from "./Pages/Faculty_Dashboard/Faculty_dashboard";
 import StudentDashboard from "./Pages/Student_Dashboard/Student_Dashboard";
+import CourseManagement from "./Pages/course_management/course";
 import AllStudents from "./Pages/AllStudent/AllStudent";
 import AllFaculty from "./Pages/AllFaculty/AllFaculty";
 import "./App.css";
@@ -16,6 +17,11 @@ function App() {
         {/* Admin Dashboard */}
         <Route path="/admin" element={<HackathonDashboard />} />
 
+        {/* Additional Pages */}
+        <Route path="/students" element={<AllStudents />} />
+        <Route path="/course-management" element={<CourseManagement />} />
+        <Route path="/faculty/all" element={<AllFaculty />} />
+
         {/* Faculty Dashboard */}
         <Route path="/faculty" element={<FacultyDashboard />} />
 
@@ -23,13 +29,9 @@ function App() {
         <Route path="/student" element={<StudentDashboard />} />
 
         {/* Authentication Routes */}
-        <Route path="user/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Register />} />
         <Route path="/user/signup" element={<Register />} />
-
-        {/* Additional Pages */}
-        <Route path="/students" element={<AllStudents />} />
-        <Route path="/faculty/all" element={<AllFaculty />} />
       </Routes>
     </Router>
   );

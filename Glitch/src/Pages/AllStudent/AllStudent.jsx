@@ -21,10 +21,10 @@ const AllStudents = () => {
 
     useEffect(() => {
         const filtered = students.filter(student =>
-            (student.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             student.email?.toLowerCase().includes(searchQuery.toLowerCase()))
+        (student.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            student.email?.toLowerCase().includes(searchQuery.toLowerCase()))
         );
-        console.log('students:', students);        
+        console.log('students:', students);
         setFilteredStudents(filtered);
         setCurrentPage(1); // Reset to first page on search
     }, [searchQuery, students]);

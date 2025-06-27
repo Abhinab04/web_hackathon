@@ -21,8 +21,8 @@ const AllFaculty = () => {
 
     useEffect(() => {
         const filtered = faculties.filter(faculty =>
-            (faculty.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             faculty.email?.toLowerCase().includes(searchQuery.toLowerCase()))
+        (faculty.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            faculty.email?.toLowerCase().includes(searchQuery.toLowerCase()))
         );
         setFilteredFaculties(filtered);
         setCurrentPage(1); // Reset to first page on search

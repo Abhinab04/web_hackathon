@@ -1,17 +1,36 @@
 import React from 'react';
 import './Faculty_Dashboard.css';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+
 
 const JudgingDashboard = ({ projects = [] }) => {
+
+    const navigate = useNavigate();
+
+    const logout = () => {
+        navigate('/')
+    }
+
+    const notify = async () => {
+        try {
+            const res = await axios.get("");
+            console.log(res)
+        } catch (error) {
+            console.log(error)
+        }
+    }
     return (
         <div className="judging-dashboard  layout-container">
             <nav className="sidebar">
                 <h2>Faculty_Dashboard</h2>
                 <ul>
                     <li className="active"><a href="#" className="active">Dashboard</a></li>
-                    <li><a href="/allSubmission">Submissions</a></li>
-                    <li><a href="#">Scoreboard</a></li>
-                    <li><a href="#">Final Decisions</a></li>
-                    <li><a href="/logout">Logout</a></li>
+                    <li><a onClick={notify}>Notification</a></li>
+                    <li><a >Quiz</a></li>
+                    <li><a href="#">Course Creation</a></li>
+                    <li><a onClick={logout}>Logout</a></li>
                 </ul>
             </nav>
 

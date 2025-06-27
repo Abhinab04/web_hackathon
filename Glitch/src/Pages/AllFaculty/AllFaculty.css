@@ -7,6 +7,18 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #ccc;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .faculty-container h2 {
@@ -15,6 +27,38 @@
     color: #e7e2e2;
     font-size: 35px;
     font-family: 'Courier New', Courier, monospace;
+    animation: slideDown 0.6s ease-out;
+    position: relative;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Adding underline animation for h2 */
+.faculty-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6b46c1, #805ad5);
+    transform: translateX(-50%);
+    animation: expandLine 0.8s ease-out forwards 0.6s;
+}
+
+@keyframes expandLine {
+    to {
+        width: 100px;
+    }
 }
 
 .search-bar {
@@ -27,6 +71,7 @@
     transition: border-color 0.2s ease-in-out;
     background-color: #1e1d1d;
     color: #fff;
+    animation: fadeIn 0.8s ease-out 0.3s backwards;
 }
 
 .search-bar:focus {
@@ -38,6 +83,7 @@
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
+    animation: fadeIn 0.8s ease-out 0.4s backwards;
 }
 
 .faculty-table th,
@@ -53,10 +99,37 @@
     font-weight: bold;
 }
 
+.faculty-table tr {
+    animation: slideIn 0.5s ease-out backwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 .faculty-table tr:hover {
     background-color: #3c3c3c;
     color: #fff;
 }
+
+/* Animate each row with increasing delay */
+.faculty-table tr:nth-child(1) { animation-delay: 0.1s; }
+.faculty-table tr:nth-child(2) { animation-delay: 0.2s; }
+.faculty-table tr:nth-child(3) { animation-delay: 0.3s; }
+.faculty-table tr:nth-child(4) { animation-delay: 0.4s; }
+.faculty-table tr:nth-child(5) { animation-delay: 0.5s; }
+.faculty-table tr:nth-child(6) { animation-delay: 0.6s; }
+.faculty-table tr:nth-child(7) { animation-delay: 0.7s; }
+.faculty-table tr:nth-child(8) { animation-delay: 0.8s; }
+.faculty-table tr:nth-child(9) { animation-delay: 0.9s; }
+.faculty-table tr:nth-child(10) { animation-delay: 1s; }
 
 .pagination {
     display: flex;
@@ -64,6 +137,7 @@
     align-items: center;
     gap: 15px;
     margin-top: 20px;
+    animation: fadeIn 0.8s ease-out 0.5s backwards;
 }
 
 .pagination button {
@@ -85,4 +159,17 @@
 .pagination span {
     font-size: 16px;
     font-weight: 500;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
 }

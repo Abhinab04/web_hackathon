@@ -35,7 +35,7 @@ const UserDashboard = ({ name }) => {
 
             <div className="main-content">
                 <div className="header">
-                    <h1 className='welcome'>Welcome Back!, {name}</h1>
+                    <h1 className='welcome'>Welcome Back Student!, {name}</h1>
                 </div>
 
                 <div className="dashboard-section">
